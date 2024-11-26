@@ -1,0 +1,131 @@
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+
+public class DiccionarioMultilenguajeGUI {
+
+   private static ArrayList<String[]> diccionario = new ArrayList<>();
+
+   static {
+       diccionario.add(new String[]{"casa", "house", "casa"});
+       diccionario.add(new String[]{"carro", "car", "auto"});
+       diccionario.add(new String[]{"computadora", "computer", "computer"});
+       diccionario.add(new String[]{"teclado", "keyboard", "tastiera"});
+       diccionario.add(new String[]{"pantalla", "screen", "schermo"});
+       diccionario.add(new String[]{"música", "music", "musica"});
+       diccionario.add(new String[]{"hombre", "man", "uomo"});
+       diccionario.add(new String[]{"mujer", "woman", "donna"});
+       diccionario.add(new String[]{"niño", "child", "bambino"});
+       diccionario.add(new String[]{"niña", "girl", "ragazza"});
+   }
+
+   public static void main(String[] args) {
+       JFrame ventana = new JFrame("Diccionario Multilenguaje");
+       ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+       ventana.setSize(500, 300);
+       ventana.setLayout(new BorderLayout());
+
+       JPanel panelOpciones = new JPanel(new FlowLayout());
+       JButton botonAgregarPalabra = new JButton("Agregar Palabra");
+       JButton botonEliminarPalabra = new JButton("Eliminar Palabra");
+       JButton botonBuscar = new JButton("Buscar");
+       JButton botonSalir = new JButton("Salir");
+       panelOpciones.add(botonAgregarPalabra);
+       panelOpciones.add(botonEliminarPalabra);
+       panelOpciones.add(botonBuscar);
+       panelOpciones.add(botonSalir);
+
+       JPanel panelCentro = new JPanel(new GridLayout(3, 2, 10, 10));
+       JLabel etiquetaPalabra = new JLabel("Palabra:");
+       JTextField campoPalabra = new JTextField();
+       JLabel etiquetaTraduccion = new JLabel("Traducción:");
+       JLabel campoTraduccion = new JLabel();
+       campoTraduccion.setOpaque(true);
+       campoTraduccion.setBackground(Color.LIGHT_GRAY);
+       campoTraduccion.setHorizontalAlignment(SwingConstants.CENTER);
+       panelCentro.add(etiquetaPalabra);
+       panelCentro.add(campoPalabra);
+       panelCentro.add(etiquetaTraduccion);
+       panelCentro.add(campoTraduccion);
+
+       ventana.add(panelOpciones, BorderLayout.NORTH);
+       ventana.add(panelCentro, BorderLayout.CENTER);
+
+       botonBuscar.addActionListener(e -> {
+           String palabra = campoPalabra.getText().trim().toLowerCase();
+           if (palabra.isEmpty()) {
+               JOptionPane.showMessageDialog(ventana, "Ingrese una palabra antes de buscar.", "Error", JOptionPane.ERROR_MESSAGE);
+               return;
+           }
+
+           String[] opcionesIdiomas = {"Inglés", "Italiano"};
+           String idiomaSeleccionado = (String) JOptionPane.showInputDialog(ventana, "Seleccione el idioma para traducir:",
+                   "Seleccionar Idioma", JOptionPane.QUESTION_MESSAGE, null, opcionesIdiomas, opcionesIdiomas[0]);
+
+           String traduccion = "No encontrada";
+           if (idiomaSeleccionado != null) {
+               switch (idiomaSeleccionado) {
+                   case "Inglés":
+                       traduccion = traducirDesdeEspanol(palabra, 1);
+                       break;
+                   case "Italiano":
+                       traduccion = traducirDesdeEspanol(palabra, 2);
+                       break;
+               }
+               campoTraduccion.setText(traduccion);
+           }
+       });
+
+       botonAgregarPalabra.addActionListener(e -> {
+           String palabraEspanol = JOptionPane.showInputDialog(ventana, "Ingrese la palabra en español:");
+           if (palabraEspanol != null && !palabraEspanol.trim().isEmpty()) {
+               String traduccionIngles = JOptionPane.showInputDialog(ventana, "Ingrese la traducción en inglés:");
+               String traduccionItaliano = JOptionPane.showInputDialog(ventana, "Ingrese la traducción en italiano:");
+               if (traduccionIngles != null && traduccionItaliano != null &&
+                       !traduccionIngles.trim().isEmpty() && !traduccionItaliano.trim().isEmpty()) {
+                   agregarPalabra(palabraEspanol, traduccionIngles, traduccionItaliano);
+                   JOptionPane.showMessageDialog(ventana, "Palabra agregada exitosamente.");
+               } else {
+                   JOptionPane.showMessageDialog(ventana, "Debe ingresar las traducciones para agregar la palabra.", "Error", JOptionPane.ERROR_MESSAGE);
+               }
+           }
+       });
+
+       botonEliminarPalabra.addActionListener(e -> {
+           String palabraEspanol = JOptionPane.showInputDialog(ventana, "Ingrese la palabra en español a eliminar:");
+           if (palabraEspanol != null && !palabraEspanol.trim().isEmpty()) {
+               eliminarPalabra(palabraEspanol);
+               JOptionPane.showMessageDialog(ventana, "Palabra eliminada exitosamente.");
+           }
+       });
+
+       // Acción: Salir
+       botonSalir.addActionListener(e -> {
+           int opcion = JOptionPane.showConfirmDialog(ventana, "¿Seguro que quieres salir?", "Confirmar salida", JOptionPane.YES_NO_OPTION);
+           if (opcion == JOptionPane.YES_OPTION) {
+               JOptionPane.showMessageDialog(ventana, "¡Hasta luego!", "Salir", JOptionPane.INFORMATION_MESSAGE);
+               ventana.dispose();  // Cierra la ventana
+           }
+       });
+
+       ventana.setVisible(true);
+   }
+
+   private static String traducirDesdeEspanol(String palabra, int columna) {
+       for (String[] entrada : diccionario) {
+           if (entrada[0].equalsIgnoreCase(palabra)) {
+               return entrada[columna];
+           }
+       }
+       return "No encontrada";
+   }
+
+   private static void agregarPalabra(String palabraEspanol, String traduccionIngles, String traduccionItaliano) {
+       diccionario.add(new String[]{palabraEspanol.toLowerCase(), traduccionIngles.toLowerCase(), traduccionItaliano.toLowerCase()});
+   }
+
+   private static void eliminarPalabra(String palabraEspanol) {
+       diccionario.removeIf(entrada -> entrada[0].equalsIgnoreCase(palabraEspanol));
+   }
+}
+
